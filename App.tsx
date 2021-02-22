@@ -8,111 +8,121 @@
  * @format
  */
 
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
+import React, { useState } from 'react';
+import { Button, View, Text } from 'react-native';
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  NavigationActions,
+  NavigationState,
+  StackNavigator,
+} from 'react-navigation-v1';
 
-declare const global: {HermesInternal: null | {}};
+const V1Stack = StackNavigator({
+  a: {
+    screen: ({ navigation }) => {
+      return (
+        <View style={{ flex: 1 }}>
+          <Text>AAAAAAAAAAA</Text>
+          <Button
+            title="B"
+            onPress={() => {
+              navigation.navigate('b');
+            }}
+          />
+        </View>
+      );
+    },
+  },
+  b: {
+    screen: ({ navigation }) => {
+      return (
+        <View style={{ flex: 1 }}>
+          <Text>BBBBBBBBBB</Text>
+          <Button
+            title="A"
+            onPress={() => {
+              navigation.goBack();
+            }}
+          />
+        </View>
+      );
+    },
+  },
+});
 
-const App = () => {
+const Tab = createBottomTabNavigator();
+
+const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.tsx</Text> to change
-                this screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text>Home Screen</Text>
+      <Button
+        title="Go to Details"
+        onPress={() => navigation.navigate('Details')}
+      />
+    </View>
   );
 };
 
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
+const DetailsScreen: React.FC = () => {
+  return (
+    <Tab.Navigator>
+      <Tab.Screen name="Feed" component={Feed} />
+      <Tab.Screen name="Messages" component={Messages} />
+    </Tab.Navigator>
+  );
+};
+
+const DetailsScreenFiber: React.FC = () => {
+  const [show, setShow] = useState(true);
+  return (
+    <View style={{ flexGrow: 1, backgroundColor: 'white' }}>
+      <View style={{ backgroundColor: 'white', height: 300 }}>
+        {show && <DetailsScreen />}
+      </View>
+      <Button
+        title="Unmount inner fiber"
+        onPress={() => {
+          setShow((prev) => !prev);
+        }}
+      />
+    </View>
+  );
+};
+
+const Feed: React.FC = () => {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text>Feed Screen</Text>
+    </View>
+  );
+};
+
+const Messages: React.FC<BottomTabBarProps> = () => {
+  return (
+    <View style={{ flex: 1 }}>
+      {/* <Text>Messages Screen</Text> */}
+      <V1Stack />
+    </View>
+  );
+};
+
+const Stack = createStackNavigator();
+
+const App: React.FC = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Details" component={DetailsScreenFiber} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
 
 export default App;
